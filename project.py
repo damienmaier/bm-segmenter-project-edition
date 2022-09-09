@@ -6,6 +6,7 @@ import toml
 
 # This is probably not the best way to do things, but I did not find any other simple way to reuse the code of
 # mlsegmentation project
+sys.path.append(str(pathlib.Path(__file__) / r".."))
 sys.path.append(str(pathlib.Path(__file__) / r"../mlsegmentation"))
 sys.path.append(str(pathlib.Path(__file__) / r"../mlsegmentation/src"))
 import mlsegmentation.src.final_model
