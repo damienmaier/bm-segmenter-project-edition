@@ -1,7 +1,14 @@
 import pathlib
+import sys
 
 import numpy as np
 import toml
+
+# This is probably not the best way to do things, but I did not find any other simple way to reuse the code of
+# mlsegmentation project
+sys.path.append(r"mlsegmentation")
+sys.path.append(r"mlsegmentation/src")
+import mlsegmentation.src.final_model
 
 
 class ProjectElement:
@@ -97,3 +104,9 @@ class Project:
     def set_dataset_file_data(self, dataset_file_data: dict):
         with self.dataset_file_path().open("w") as dataset_file_descriptor:
             toml.dump(dataset_file_data, dataset_file_descriptor)
+
+    def add_ml_predictions(self, mask_name: str) -> None:
+        images = [element.image() for element in self.elements()]
+        predicted_masks = mlsegmentation.src.final_model.predict_from_images_iterable(images)
+        for element, predicted_mask in zip(self.elements(), predicted_masks):
+            element.set_prediction_mask(prediction_mask=predicted_mask, mask_name=mask_name)
