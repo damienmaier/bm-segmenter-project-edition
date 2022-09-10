@@ -24,7 +24,7 @@ class ProjectElement:
 
     def image_file_data(self):
         if self._image_file_data_cache is None:
-            self._image_file_data_cache = dict(np.load(self.image_directory_path() / "0.npz"))
+            self._image_file_data_cache = dict(np.load(self.image_directory_path() / "0.npz", allow_pickle=True))
 
         return self._image_file_data_cache
 
@@ -38,7 +38,7 @@ class ProjectElement:
         mask_file_path = self.mask_file_path(mask_name)
         if not mask_file_path.exists():
             raise FileNotFoundError(mask_file_path, "does not exist")
-        return dict(np.load(mask_file_path))
+        return dict(np.load(mask_file_path, allow_pickle=True))
 
     def save_mask_file_data(self, mask_name: str, mask_file_data: dict):
         np.savez(self.mask_file_path(mask_name), **mask_file_data)
