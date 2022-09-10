@@ -1,3 +1,0 @@
-[submodule "mlsegmentation"]
-	path = mlsegmentation
-	url = git@github.com:damienmaier/l3-segmentation.git
