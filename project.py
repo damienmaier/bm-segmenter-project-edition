@@ -1,3 +1,64 @@
+"""
+Provides code for reading and editing a BM-segmenter project.
+
+A BM-segmenter project has the following structure :
+<project root>
+    <project name>.ml_prj
+    dataset.toml
+    models
+        <segmentation1>.seg
+        <segmentation2>.seg
+        ...
+    data
+        dicoms
+            <case1>
+                0.npz
+            <case2>
+                0.npz
+            <case3>
+                0.npz
+            ...
+    masks
+        <segmentation1>
+            <case1>.npz
+            <case2>.npz
+            <case3>.npz
+            ...
+        <segmentation2>
+            <case1>.npz
+            <case2>.npz
+            <case3>.npz
+            ...
+        <segmentation3>
+            <case1>.npz
+            <case2>.npz
+            <case3>.npz
+            ...
+
+<project name>.ml_prj contains the name and description of the project and the user names.
+
+`dataset.toml` contains a list of all the case names. It also contains a mapping between case groups and the cases
+they contain. The group feature does not seem to be often used by the actual users.
+
+<segmentation>.seg stores the name and color of the segmentation
+
+0.npz contains key-value pairs :
+    - matrix : a 2D numpy array containing the HU values
+    - spacing : a pair of floats indicating the physical size corresponding to a pixel
+    - windowing : the min and max HU values set by the user for the grayscale conversion
+    - crop_x : a pair of value, each between 0 and 100 that indicates the start and end horizontal percentage of the image that must be displayed
+    - crop_y : same with vertical percentages
+    - slice_info : unknown
+
+
+<segmentation>/<case>.npz contains key-value pairs :
+    - predicted : a 2D array for the predicted matrix
+    - current : a 2D array for the current segmentation matrix
+    - validated : a 2D array for the validated. The image is validated if and only if this key has a value.
+    - users : a list of the users that have validated the segmentation
+
+"""
+
 import pathlib
 import sys
 
@@ -13,6 +74,9 @@ import mlsegmentation.src.final_model
 
 
 class ProjectElement:
+    """
+    Represents a BM-Segmenter project element, i.e. a case that has an image and some segmentations
+    """
     def __init__(self, project: "Project", element_name: str) -> None:
         self.project = project
         self.name = element_name
@@ -23,6 +87,7 @@ class ProjectElement:
         return self.project.images_directory() / self.name
 
     def image_file_data(self):
+        # This cache is only to avoid performance issues
         if self._image_file_data_cache is None:
             self._image_file_data_cache = dict(np.load(self.image_directory_path() / "0.npz", allow_pickle=True))
 
@@ -69,6 +134,9 @@ class ProjectElement:
 
 
 class Project:
+    """
+    Represents a BM-segmenter project
+    """
     def __init__(self, project_path: pathlib.Path) -> None:
         self.path = project_path
 
