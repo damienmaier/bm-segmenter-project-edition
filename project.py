@@ -112,7 +112,24 @@ class ProjectElement:
     def set_mask_file_data(self, mask_name: str, mask_file_data: dict):
         np.savez(self.mask_file_path(mask_name), **mask_file_data)
 
-    def set_prediction_mask(self, mask_name: str, prediction_mask: np.ndarray):
+    def predicted_mask(self, mask_name: str) -> np.ndarray:
+        return self.mask_file_data(mask_name)["predicted"]
+
+    def current_mask(self, mask_name: str) -> np.ndarray:
+        return self.mask_file_data(mask_name)["current"]
+
+    def validated_mask(self, mask_name: str) -> np.ndarray:
+        return self.mask_file_data(mask_name)["validated"]
+
+    def validators(self, mask_name: str) -> list[str]:
+        return self.mask_file_data(mask_name)["users"]
+
+    def is_validated(self, mask_name: str) -> bool:
+        result = len(self.validators(mask_name)) > 0
+        if result:
+            assert np.array_equal(self.validated_mask(mask_name), self.current_mask(mask_name))
+
+    def set_predicted_mask(self, mask_name: str, prediction_mask: np.ndarray):
         try:
             mask_file_data = self.mask_file_data(mask_name)
         except FileNotFoundError:
