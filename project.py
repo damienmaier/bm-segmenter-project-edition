@@ -83,6 +83,8 @@ class ProjectElement:
 
         self._image_file_data_cache = None
 
+    # image data
+
     def image_directory_path(self) -> pathlib.Path:
         return self.project.images_directory() / self.name
 
@@ -96,6 +98,8 @@ class ProjectElement:
     def image(self) -> np.ndarray:
         return self.image_file_data()["matrix"]
 
+    # mask data
+
     def mask_file_path(self, mask_name: str) -> pathlib.Path:
         return self.project.masks_directory() / mask_name / (self.name + ".npz")
 
@@ -105,7 +109,7 @@ class ProjectElement:
             raise FileNotFoundError(mask_file_path, "does not exist")
         return dict(np.load(mask_file_path, allow_pickle=True))
 
-    def save_mask_file_data(self, mask_name: str, mask_file_data: dict):
+    def set_mask_file_data(self, mask_name: str, mask_file_data: dict):
         np.savez(self.mask_file_path(mask_name), **mask_file_data)
 
     def set_prediction_mask(self, mask_name: str, prediction_mask: np.ndarray):
@@ -114,7 +118,8 @@ class ProjectElement:
         except FileNotFoundError:
             mask_file_data = {}
         mask_file_data["predicted"] = prediction_mask.astype(np.uint8)
-        self.save_mask_file_data(mask_name=mask_name, mask_file_data=mask_file_data)
+        self.set_mask_file_data(mask_name=mask_name, mask_file_data=mask_file_data)
+
 
     def rename(self, new_name: str) -> None:
         image_directory_path = self.image_directory_path()
