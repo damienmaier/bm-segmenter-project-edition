@@ -65,14 +65,6 @@ import sys
 import numpy as np
 import toml
 
-# This is probably not the best way to do things, but I did not find any other simple way to reuse the code of
-# mlsegmentation project
-sys.path.append(str(pathlib.Path(__file__) / r".."))
-sys.path.append(str(pathlib.Path(__file__) / r"../mlsegmentation"))
-sys.path.append(str(pathlib.Path(__file__) / r"../mlsegmentation/src"))
-import mlsegmentation.src.final_model
-
-
 class ProjectElement:
     """
     Represents a BM-Segmenter project element, i.e. a case that has an image and some segmentations
@@ -82,6 +74,9 @@ class ProjectElement:
         self.name = element_name
 
         self._image_file_data_cache = None
+
+    def ipp(self) -> str:
+        return self.name.split('___')[0]
 
     # image data
 
@@ -128,6 +123,7 @@ class ProjectElement:
         result = len(self.validators(mask_name)) > 0
         if result:
             assert np.array_equal(self.validated_mask(mask_name), self.current_mask(mask_name))
+        return result
 
     def set_predicted_mask(self, mask_name: str, prediction_mask: np.ndarray):
         try:
@@ -198,6 +194,11 @@ class Project:
 
     def add_ml_predictions(self, mask_name: str) -> None:
         images = [element.image() for element in self.elements()]
+
+        sys.path.append(str(pathlib.Path(__file__).parent / 'mlsegmentation'))
+        sys.path.append(str(pathlib.Path(__file__).parent / 'mlsegmentation' / 'src'))
+        import mlsegmentation.src.final_model
+
         predicted_masks = mlsegmentation.src.final_model.predict_from_images_iterable(images)
         for element, predicted_mask in zip(self.elements(), predicted_masks):
             element.set_prediction_mask(prediction_mask=predicted_mask, mask_name=mask_name)
