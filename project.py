@@ -58,7 +58,7 @@ they contain. The group feature does not seem to be often used by the actual use
     - users : a list of the users that have validated the segmentation
 
 """
-
+import datetime
 import pathlib
 import sys
 
@@ -124,6 +124,10 @@ class ProjectElement:
         if result:
             assert np.array_equal(self.validated_mask(mask_name), self.current_mask(mask_name))
         return result
+
+    def mask_last_edit_time(self, mask_name: str) -> datetime.datetime:
+        date_float = self.mask_file_path(mask_name).stat().st_mtime
+        return datetime.datetime.fromtimestamp(date_float)
 
     def set_predicted_mask(self, mask_name: str, prediction_mask: np.ndarray):
         try:
@@ -195,6 +199,8 @@ class Project:
     def add_ml_predictions(self, mask_name: str) -> None:
         images = [element.image() for element in self.elements()]
 
+        # importing mlsegmentation is slow because it itself imports tensorflow
+        # we only import it if needed
         sys.path.append(str(pathlib.Path(__file__).parent / 'mlsegmentation'))
         sys.path.append(str(pathlib.Path(__file__).parent / 'mlsegmentation' / 'src'))
         import mlsegmentation.src.final_model
