@@ -58,6 +58,7 @@ they contain. The group feature does not seem to be often used by the actual use
     - users : a list of the users that have validated the segmentation
 
 """
+import csv
 import datetime
 import pathlib
 import sys
@@ -65,17 +66,19 @@ import sys
 import numpy as np
 import toml
 
+
 class ProjectElement:
     """
     Represents a BM-Segmenter project element, i.e. a case that has an image and some segmentations
     """
+
     def __init__(self, project: "Project", element_name: str) -> None:
         self.project = project
         self.name = element_name
 
         self._image_file_data_cache = None
 
-    def ipp(self) -> str:
+    def name_prefix(self) -> str:
         return self.name.split('___')[0]
 
     # image data
@@ -92,6 +95,9 @@ class ProjectElement:
 
     def image(self) -> np.ndarray:
         return self.image_file_data()["matrix"]
+
+    def pixel_dimensions_mm(self) -> tuple[float, float]:
+        return self.image_file_data()["spacing"]
 
     # mask data
 
@@ -137,7 +143,6 @@ class ProjectElement:
         mask_file_data["predicted"] = prediction_mask.astype(np.uint8)
         self.set_mask_file_data(mask_name=mask_name, mask_file_data=mask_file_data)
 
-
     def rename(self, new_name: str) -> None:
         image_directory_path = self.image_directory_path()
         image_directory_path.rename(image_directory_path.with_name(new_name))
@@ -159,6 +164,7 @@ class Project:
     """
     Represents a BM-segmenter project
     """
+
     def __init__(self, project_path: pathlib.Path) -> None:
         self.path = project_path
 
@@ -178,7 +184,12 @@ class Project:
         return self.dataset_file_data()["files"]
 
     def elements(self) -> list[ProjectElement]:
-        return [ProjectElement(self, element_name) for element_name in self.element_names()]
+        result = [ProjectElement(self, element_name) for element_name in self.element_names()]
+
+        # sort in the same way as the BM-segmenter software
+        def sorting_key(element: ProjectElement):
+            return len(element.name_prefix()), element.name_prefix()
+        return sorted(result, key=sorting_key)
 
     def set_dataset_file_element_names(self, element_names: list[str]):
         dataset_file_data = self.dataset_file_data()
