@@ -8,6 +8,11 @@ def write_measurement_csv_for_bmsegmenter_project(
         project_path: str, mask_name: str,
         restricted_hu_range_min: int, restricted_hu_range_max: int
 ) -> None:
+    """
+    For a BM-segmenter project, writes a csv file with information about surfaces related to a mask.
+
+    The CSV file has one row for each element in the project. Values are computed only for validated elements.
+    """
     bms_project = project.Project(pathlib.Path(project_path))
 
     with open(bms_project.path / f"{mask_name}_measurements.csv", "w", newline='') as csv_file:
