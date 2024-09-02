@@ -126,7 +126,16 @@ class ProjectElement:
         return self.mask_file_data(mask_name)["users"]
 
     def is_validated(self, mask_name: str) -> bool:
-        result = len(self.validators(mask_name)) > 0
+        # It seems that in some situations:
+        # - a mask that was never validated may not have a "users" key (KeyError)
+        # - if no data was added to this image for this segmentation, the mask file may not exist (FileNotFoundError)
+        try:
+            validators = self.validators(mask_name)
+        except (FileNotFoundError, KeyError):
+            result = False
+        else:
+            result = len(validators) > 0
+
         if result:
             assert np.array_equal(self.validated_mask(mask_name), self.current_mask(mask_name))
         return result
