@@ -1,6 +1,7 @@
-import project
 import csv
 import pathlib
+
+from bms_project_edition import project
 
 
 def write_measurement_csv_for_bmsegmenter_project(
