@@ -207,15 +207,3 @@ class Project:
         with self.dataset_file_path().open("w") as dataset_file_descriptor:
             toml.dump(dataset_file_data, dataset_file_descriptor)
 
-    def add_ml_predictions(self, mask_name: str) -> None:
-        images = [element.image() for element in self.elements()]
-
-        # importing mlsegmentation is slow because it itself imports tensorflow
-        # we only import it if needed
-        sys.path.append(str(pathlib.Path(__file__).parent / 'mlsegmentation'))
-        sys.path.append(str(pathlib.Path(__file__).parent / 'mlsegmentation' / 'src'))
-        import mlsegmentation.src.final_model
-
-        predicted_masks = mlsegmentation.src.final_model.predict_from_images_iterable(images)
-        for element, predicted_mask in zip(self.elements(), predicted_masks):
-            element.set_prediction_mask(prediction_mask=predicted_mask, mask_name=mask_name)
