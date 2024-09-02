@@ -137,7 +137,11 @@ class ProjectElement:
             result = len(validators) > 0
 
         if result:
-            assert np.array_equal(self.validated_mask(mask_name), self.current_mask(mask_name))
+            # If the segmentation is validated, the validated mask should be equal to the current mask.
+            # In the particular case where the predicted mask was validated without modification, the current mask is
+            # empty.
+            assert (self.current_mask(mask_name).shape == ()
+                    or np.array_equal(self.validated_mask(mask_name), self.current_mask(mask_name)))
         return result
 
     def mask_last_edit_time(self, mask_name: str) -> datetime.datetime:
@@ -198,6 +202,7 @@ class Project:
         # sort in the same way as the BM-segmenter software
         def sorting_key(element: ProjectElement):
             return len(element.name_prefix()), element.name_prefix()
+
         return sorted(result, key=sorting_key)
 
     def set_dataset_file_element_names(self, element_names: list[str]):
@@ -215,4 +220,3 @@ class Project:
     def set_dataset_file_data(self, dataset_file_data: dict):
         with self.dataset_file_path().open("w") as dataset_file_descriptor:
             toml.dump(dataset_file_data, dataset_file_descriptor)
-
