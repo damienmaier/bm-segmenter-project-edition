@@ -2,8 +2,8 @@ import sys
 import pathlib
 from bms_project_edition import project
 
-sys.path.append(str(pathlib.Path(__file__).parent / 'mlsegmentation'))
-sys.path.append(str(pathlib.Path(__file__).parent / 'mlsegmentation' / 'src'))
+sys.path.append(str(pathlib.Path(__file__).parent.parent / 'mlsegmentation'))
+sys.path.append(str(pathlib.Path(__file__).parent.parent / 'mlsegmentation' / 'src'))
 import final_model
 
 
