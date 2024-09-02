@@ -16,4 +16,4 @@ def compute_mask_predictions_from_ml_model(project_path: str, mask_name: str) ->
     images = [element.image() for element in bms_project.elements()]
     predicted_masks = final_model.predict_from_images_iterable(images)
     for element, predicted_mask in zip(bms_project.elements(), predicted_masks):
-        element.set_prediction_mask(prediction_mask=predicted_mask, mask_name=mask_name)
+        element.set_predicted_mask(predicted_mask=predicted_mask, mask_name=mask_name)

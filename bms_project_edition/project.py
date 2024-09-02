@@ -135,12 +135,12 @@ class ProjectElement:
         date_float = self.mask_file_path(mask_name).stat().st_mtime
         return datetime.datetime.fromtimestamp(date_float)
 
-    def set_predicted_mask(self, mask_name: str, prediction_mask: np.ndarray):
+    def set_predicted_mask(self, mask_name: str, predicted_mask: np.ndarray):
         try:
             mask_file_data = self.mask_file_data(mask_name)
         except FileNotFoundError:
             mask_file_data = {}
-        mask_file_data["predicted"] = prediction_mask.astype(np.uint8)
+        mask_file_data["predicted"] = predicted_mask.astype(np.uint8)
         self.set_mask_file_data(mask_name=mask_name, mask_file_data=mask_file_data)
 
     def rename(self, new_name: str) -> None:
