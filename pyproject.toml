@@ -1,0 +1,6 @@
+[project]
+name = "bmspe"
+version = "1.0"
+dependencies = [
+	"toml"
+]
